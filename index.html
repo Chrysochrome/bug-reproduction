@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>File upload test</title>
+</head>
+<body>
+  <h1>Upload file to Node.js</h1>
+  <!-- <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" />
+    <button type="submit">Upload</button>
+  </form> -->
+  <input type="file" id="fileInput" />
+  <button id="fetchUploadBtn">Upload via Fetch</button>
+  <button id="kyUploadBtn">Upload via Ky</button>
+  <button id="kyUploadProgressBtn">Upload via Ky upload progress</button>
+  <script type="module">
+    import ky from 'https://esm.sh/ky';
+    const fileInput = document.getElementById('fileInput');
+    const fetchUploadBtn = document.getElementById('fetchUploadBtn');
+    const kyUploadBtn = document.getElementById('kyUploadBtn');
+    const kyUploadProgressBtn = document.getElementById('kyUploadProgressBtn');
+
+    fetchUploadBtn.addEventListener('click', async () => {
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await fetch('/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const result = await response.json();
+      console.log('Fetch upload result:', result);
+    });
+
+    kyUploadBtn.addEventListener('click', async () => {
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await ky.post('/upload', {
+        body: formData
+      }).json();
+      console.log('Ky upload result:', response);
+    });
+
+    kyUploadProgressBtn.addEventListener('click', async () => {
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await ky.post('/upload', {
+        body: formData,
+        onUploadProgress: (progress) => {
+          console.log(`Uploaded ${progress.percent * 100}%`);
+        }
+      }).json();
+      console.log('Ky upload with progress result:', response);
+    });
+  </script>
+</body>
+</html>
