@@ -1,6 +1,12 @@
 import express from 'express';
+import mongoose from 'mongoose';
+
 const app = express()
 const port = 3000
+
+const client = await mongoose.connect(process.env.MONGO_CONNECTION_STRING || '')
+
+console.log('Connected to MongoDB');
 
 const results = [];
 
@@ -11,8 +17,12 @@ setInterval(() => {
   });
 }, 60 * 1000);
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
+app.get('/', async (req, res) => {
+  const col = client.connection.db.collection('system.version');
+  const data = await col.find({}).toArray();
+
+  console.log(data);
+  res.send(data);
 })
 
 app.get('/memory', (req, res) => {
@@ -34,7 +44,7 @@ function startSelfHealthCheck() {
     } catch (error) {
       console.log(`${process.env.RUNTIME}-${new Date().toISOString()}: check failed`);
     }
-  }, 50);
+  }, 25 * 1000);
 }
 
 app.listen(port, () => {
